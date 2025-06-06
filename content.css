@@ -1,0 +1,157 @@
+#pipController {
+    position: fixed;
+    opacity: 1;
+    background: #444;
+    color: white;
+    border-radius: 4px;
+    padding: 3px 5px 0;
+    margin: 0;
+    cursor: default;
+    z-index: 9999999;
+    cursor: move;
+    box-sizing: border-box;
+    top: calc(50% - 13px);
+    left: calc(50% - 130px);
+}
+
+#pipController .controls {
+    display: flex;
+    line-height: 1.8em;
+    font-family: sans-serif;
+    font-size: 13px;
+    user-select: none;
+    align-items: center;
+    gap: 8px;
+    border-top: 1px solid #555;
+    flex-direction: column;
+    margin: 8px 2px 4px;
+}
+
+#pipController .controls .control-time {
+    font-size: 11px;
+}
+
+#pipController .subtitles {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 30px;
+    line-height: 15px;
+    user-select: none;
+    text-align: center;
+    width: 100%;
+    overflow: visible !important;
+    text-overflow: ellipsis;
+    white-space: normal;
+    font-size: 13px;
+    font-family: "YouTube Noto", Roboto, "Arial Unicode Ms", Arial, Helvetica, Verdana, "PT Sans Caption", sans-serif;
+    color: #eee;
+}
+
+#pipController .subtitles.hidden {
+    display: none;
+}
+
+#pipController .controls button {
+    display: flex;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #fff;
+    font-weight: normal;
+    padding: 5px;
+    border-radius: 13px;
+    margin: 0;
+    font-size: 16px;
+    font-family: "Lucida Console", Monaco, monospace;
+    transition: color 0.2s;
+    align-items: center;
+    height: unset;
+}
+
+#pipController .controls button:hover {
+    background-color: #555;
+}
+
+#pipController .controls .control-row {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    align-items: center;
+    gap: calc(1.8%);
+    margin: 0 3px;
+}
+
+#pipController .controls .control-row.second-row {
+    margin: 0 2px 0 -2px;
+}
+
+#pipController .controls .control-row .control-group {
+    display: flex;
+    flex-direction: row;
+    margin: 0;
+    gap: 0;
+    align-items: center;
+}
+
+#pipController .controls .control-row .control-group:last-child {
+    margin-left: auto;
+}
+
+#pipController .draggable {
+    display: flex;
+    margin: 0;
+    font-family: arial, sans-serif;
+    user-select: none;
+}
+
+#pipController .draggable svg {
+    height: 16px;
+    width: 16px;
+}
+
+#pipController button:hover {
+    color: #fff;
+}
+
+#pipController button:active {
+    color: #fff;
+    font-weight: bold;
+}
+
+#pipVolume, #pipProgress {
+    height: 3px;
+    outline: none;
+    border: none;
+    margin: 0;
+    width: 100%;
+}
+
+#pipVolume {
+    width: 50px !important;
+}
+
+#pipProgress {
+    flex-grow: 1;
+}
+
+#pipController input {
+    cursor: pointer;
+    appearance: none;
+    outline: none;
+    background: linear-gradient( to right, rgba(246, 75, 75, 1) var(--litters-range), rgba(127, 127, 127, 0.86) var(--litters-range));
+}
+
+#pipController input::-webkit-slider-thumb {
+    cursor: pointer;
+    appearance: none;
+    width: 8px;
+    height: 8px;
+    background: #eee;
+    border-radius: 50%;
+}
+
+/* Netflix */
+.player-timedtext {
+    z-index: 1;
+}

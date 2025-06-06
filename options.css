@@ -1,0 +1,10 @@
+body {
+    font-size: 0.95em;
+    padding: 10px;
+    width: 560px;
+}
+
+label {
+    display: flex;
+    gap: 10px;
+}
