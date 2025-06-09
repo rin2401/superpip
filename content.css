@@ -48,6 +48,24 @@
     color: #eee;
 }
 
+
+.art-subtitle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 30px;
+    line-height: 15px;
+    user-select: none;
+    text-align: center;
+    width: 100%;
+    overflow: visible !important;
+    text-overflow: ellipsis;
+    white-space: normal;
+    font-size: 13px;
+    font-family: "YouTube Noto", Roboto, "Arial Unicode Ms", Arial, Helvetica, Verdana, "PT Sans Caption", sans-serif;
+    color: #eee;
+}
+
 #pipController .subtitles.hidden {
     display: none;
 }

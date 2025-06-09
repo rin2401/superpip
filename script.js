@@ -70,7 +70,16 @@
                             let t = e[e.length - 1];
                             n = t.parentElement, o.append(t)
                         }
-                    } else i === t.TWITCH ? e.document.querySelector("#pipProgress").classList.add("disabled") : console.log("Site not supported")
+                    } else if (i === t.TWITCH) {
+                        e.document.querySelector("#pipProgress").classList.add("disabled")
+                    } else {
+                        console.log("Site not supported")
+                        let e = document.querySelector(".art-subtitle");
+                        let z = o.querySelector("#pipController");
+                        console.log(e)
+                        console.log(z)
+                        z.prepend(e)
+                    }
                 },
                 exitPiPHandler: function (e) {
                     let o = r();
@@ -87,7 +96,11 @@
                     } else if (o === t.PRIMEVIDEO) {
                         let t = e.target.querySelector(".atvwebplayersdk-captions-overlay");
                         t && n && (n.append(t), n = null)
-                    } else o === t.TWITCH ? console.log("Twitch") : console.log("Site not supported")
+                    } else if (o === t.TWITCH) {
+                        console.log("Twitch")
+                    } else {
+                        console.log("Site not supported")
+                    }
                 },
                 metadataLoadedHandler: function (e, n) {
                     let l = e.target;
