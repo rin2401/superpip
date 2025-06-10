@@ -205,19 +205,6 @@
                     return document.documentElement.getAttribute(e)
                 },
                 getSizeStr: function (e, t) {
-
-                    console.log("getSizeStr", e, t, t / e)
-
-                    ratio = 16 / 9
-
-                    if (t / e > ratio) {
-                        t = Math.round(e * ratio)
-                    } else {
-                        e = Math.round(t / ratio)
-                    }
-
-                    console.log("getSizeStr result", e, t)
-
                     return e + "," + t
                 },
                 parseSizeStr: function (e) {
