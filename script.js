@@ -844,6 +844,10 @@ function getModule(idx) {
         width: 400
     };
 
+    const escapeHTMLPolicy = trustedTypes.createPolicy("forceInner", {
+        createHTML: e => e
+    })
+
     function setHtml(e, html) {
         if (e) {
             e.innerHTML = escapeHTMLPolicy.createHTML(html)
@@ -1149,9 +1153,6 @@ function getModule(idx) {
         pipHandler.sendFromScript("mouseleave")
         window.focus()
     }
-    escapeHTMLPolicy = trustedTypes.createPolicy("forceInner", {
-        createHTML: e => e
-    })
 
     pipHandler.listenToContent(((e, t) => {
         console.log({
