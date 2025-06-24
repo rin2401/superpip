@@ -1,13 +1,10 @@
-(() => {
-    "use strict";
-    chrome.action.onClicked.addListener((e => {
-        chrome.scripting.executeScript({
-            target: {
-                tabId: e.id,
-                allFrames: false
-            },
-            world: "MAIN",
-            files: ["script.js"]
-        })
-    }))
-})();
+chrome.action.onClicked.addListener((tab => {
+    chrome.scripting.executeScript({
+        target: {
+            tabId: tab.id,
+            allFrames: true
+        },
+        world: "MAIN",
+        files: ["script.js"]
+    })
+}))
