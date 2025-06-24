@@ -1180,17 +1180,23 @@ function getModule(idx) {
         documentPictureInPicture.window.close();
     } else {
         const video = findLargestPlayingVideo();
-        console.log("findLargestPlayingVideo", video);
 
         if (!video) {
             return;
         }
 
         parentVideo = video.parentElement;
-        let windowPiP = await documentPictureInPicture.requestWindow({
-            height: windowConfig.height,
-            width: windowConfig.width
-        });
+        let windowPiP;
+        try {
+            windowPiP = await documentPictureInPicture.requestWindow({
+                height: windowConfig.height,
+                width: windowConfig.width
+            });
+        } catch (e) {
+            await video.requestPictureInPicture();
+            return;
+        }
+
         videoWidth = video.videoWidth
         videoHeight = video.videoHeight
 
