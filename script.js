@@ -904,14 +904,14 @@ function getModule(idx) {
         return window.location.href.match(/https:\/\/.+\.netflix\.com\//)
     }
 
-    function seekPiP(e) {
+    function seekNeflix(value) {
         document.documentElement.setAttribute("seeking", 1);
-        var t, n, o = Math.floor(1e3 * parseFloat(e));
-        t = window.netflix.appContext.state.playerApp.getAPI().videoPlayer;
-        n = t.getAllPlayerSessionIds()[0];
-        var i = t.getVideoPlayerBySessionId(n);
+        var time = Math.floor(1e3 * parseFloat(value));
+        var videoPlayer = window.netflix.appContext.state.playerApp.getAPI().videoPlayer;
+        var sessionId = videoPlayer.getAllPlayerSessionIds()[0];
+        var video = videoPlayer.getVideoPlayerBySessionId(sessionId);
 
-        i.seek(i.getCurrentTime() + o);
+        video.seek(video.getCurrentTime() + time);
         document.documentElement.removeAttribute("seeking")
     }
 
@@ -951,7 +951,7 @@ function getModule(idx) {
         if (!video) return;
 
         if (isNetflix()) {
-            seekPiP(-10)
+            seekNeflix(-10)
         } else {
             video.currentTime = video.currentTime - 10
         }
@@ -961,7 +961,7 @@ function getModule(idx) {
         const video = getVideo(e);
         if (!video) return;
         if (isNetflix()) {
-            seekPiP(10)
+            seekNeflix(10)
         } else {
             video.currentTime = video.currentTime + 10
         }
@@ -1035,12 +1035,14 @@ function getModule(idx) {
         }))
 
         pipDiv.document.querySelector("#pipProgress").addEventListener("input", (t => {
-            let n = parseFloat(t.target.value) / 100;
+            let processPercent = parseFloat(t.target.value) / 100;
+            console.log("pipProgress:", processPercent)
+
             let video = getVideo(pipDiv);
             if (!video) return;
             if (isNetflix()) {
                 document.documentElement.setAttribute("seeking", 1);
-                let duration = Math.floor(video.duration * n + .5)
+                let duration = Math.floor(video.duration * processPercent + .5)
                 duration = Math.floor(1e3 * parseFloat(duration));
                 var videoPlayer = window.netflix.appContext.state.playerApp.getAPI().videoPlayer
                 var sessionId = videoPlayer.getAllPlayerSessionIds()[0]
@@ -1051,7 +1053,7 @@ function getModule(idx) {
                 }), 500)
 
             } else {
-                video.currentTime = Math.floor(getDuration(video) * n + .5)
+                video.currentTime = Math.floor(getDuration(video) * processPercent + .5)
             }
         }))
 
