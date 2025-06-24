@@ -280,189 +280,269 @@ function n(o) {
 }
 
 (async () => {
-    const e = n(944),
-        t = n(748),
-        o = n(52),
-        i = n(464);
-    let r, l, a = null,
-        s = null,
-        c = {
-            speedupYoutubeAds: !1,
-            height: 225,
-            width: 400
-        };
+    const M944 = n(944)
+    const M748 = n(748)
+    const controlStyles = n(52)
+    const M464 = n(464)
 
-    function d(e, t) {
-        e && (e.innerHTML = escapeHTMLPolicy.createHTML(t))
+    let videoHeight = null;
+    let videoWidth = null;
+    let intervalTask = null;
+    let parentVideo = null;
+    let windowConfig = {
+        speedupYoutubeAds: !1,
+        height: 225,
+        width: 400
+    };
+
+    function setHtml(e, t) {
+        if (e) {
+            e.innerHTML = escapeHTMLPolicy.createHTML(t)
+        }
     }
 
-    function u(e) {
+    function getVideo(e) {
         return e.document.querySelector("video")
     }
 
-    function p(e) {
-        const t = u(e);
-        t && (t.paused ? t.play() : t.pause())
+    function togglePlay(e) {
+        const video = getVideo(e);
+        if (!video) return;
+        if (video.paused) {
+            video.play()
+        } else {
+            video.pause()
+        }
     }
 
-    function m(e) {
+    function getSettingsMenu(e) {
         return e.document.querySelector(".ytp-settings-menu")
     }
 
-    function g(e, t) {
+    function isEqual(e, t) {
         return Math.abs(e - t) < 1e-6
     }
 
-    function h(e, t) {
-        ! function (e) {
-            let t = e.document.querySelector('[aria-checked="true"]');
-            t && t.setAttribute("aria-checked", "false")
-        }(e);
+    function checkMenu(e, t) {
+        let ariaChecked = e.document.querySelector('[aria-checked="true"]');
+
+        if (ariaChecked) {
+            ariaChecked.setAttribute("aria-checked", "false")
+        }
+
         let n = 2;
-        g(t, .5) ? n = 0 : g(t, .75) ? n = 1 : g(t, 1) ? n = 2 : g(t, 1.25) ? n = 3 : g(t, 1.5) ? n = 4 : g(t, 2) && (n = 5), Array.from(e.document.querySelectorAll(".ytp-menuitem"))[n].setAttribute("aria-checked", "true")
+        if (isEqual(t, .5)) {
+            n = 0
+        } else if (isEqual(t, .75)) {
+            n = 1
+        } else if (isEqual(t, 1)) {
+            n = 2
+        } else if (isEqual(t, 1.25)) {
+            n = 3
+        } else if (isEqual(t, 1.5)) {
+            n = 4
+        } else if (isEqual(t, 2)) {
+            n = 5
+        }
+        Array.from(e.document.querySelectorAll(".ytp-menuitem"))[n].setAttribute("aria-checked", "true")
     }
 
-    function f() {
-        return !!window.location.href.match(/https:\/\/.+\.netflix\.com\//)
+    function isNetflix() {
+        return window.location.href.match(/https:\/\/.+\.netflix\.com\//)
     }
 
-    function v(e) {
-        document.documentElement.setAttribute("seeking", !0);
-        var t, n, o = Math.floor(1e3 * parseFloat(e)),
-            i = (n = (t = window.netflix.appContext.state.playerApp.getAPI().videoPlayer).getAllPlayerSessionIds()[0], t.getVideoPlayerBySessionId(n));
-        i.seek(i.getCurrentTime() + o), document.documentElement.removeAttribute("seeking")
+    function seekPiP(e) {
+        document.documentElement.setAttribute("seeking", 1);
+        var t, n, o = Math.floor(1e3 * parseFloat(e));
+        t = window.netflix.appContext.state.playerApp.getAPI().videoPlayer;
+        n = t.getAllPlayerSessionIds()[0];
+        var i = t.getVideoPlayerBySessionId(n);
+
+        i.seek(i.getCurrentTime() + o);
+        document.documentElement.removeAttribute("seeking")
     }
 
-    function y(e) {
-        if ((e = documentPictureInPicture.window).innerWidth * r > e.innerHeight * l) {
-            let t = Math.floor(e.innerHeight * l / r + .5),
-                n = e.innerWidth;
+    function cropPiP() {
+        let e = documentPictureInPicture.window
+        if (e.innerWidth * videoHeight > e.innerHeight * videoWidth) {
+            let t = Math.floor(e.innerHeight * videoWidth / videoHeight + .5)
+            let n = e.innerWidth;
             e.resizeBy(t - n, 0)
-        } else if (e.innerWidth * r < e.innerHeight * l) {
-            let t = Math.floor(e.innerWidth * r / l + .5),
-                n = e.innerHeight;
+        } else if (e.innerWidth * videoHeight < e.innerHeight * videoWidth) {
+            let t = Math.floor(e.innerWidth * videoHeight / videoWidth + .5)
+            let n = e.innerHeight;
             e.resizeBy(0, t - n)
-        } else console.log("already perfect. nothing to do")
+        } else {
+            console.log("already perfect. nothing to do")
+        }
     }
 
-    function w(e) {
+    function setSliderValue(e) {
         let t = e.value + "%";
+        e.value = t
         e.style.setProperty("--litters-range", t)
+
+        // console.log("setSliderValue:", e)
     }
 
-    function b(e) {
-        return document.body.hasAttribute("data-duration") ? parseFloat(document.body.getAttribute("data-duration")) : e.duration
+    function getDuration(e) {
+        if (document.body.hasAttribute("data-duration")) {
+            return parseFloat(document.body.getAttribute("data-duration"))
+        } else {
+            return e.duration
+        }
     }
 
-    function x(e) {
-        f() ? function (e) {
-            u(e) && v(-10)
-        }(e) : function (e) {
-            const t = u(e);
-            t && (t.currentTime = t.currentTime - 10)
-        }(e)
+    function seekBackward(e) {
+        const video = getVideo(e);
+        if (!video) return;
+
+        if (isNetflix()) {
+            seekPiP(-10)
+        } else {
+            video.currentTime = video.currentTime - 10
+        }
     }
 
-    function C(e) {
-        f() ? function (e) {
-            u(e) && v(10)
-        }(e) : function (e) {
-            const t = u(e);
-            t && (t.currentTime = t.currentTime + 10)
-        }(e)
+    function seekForward(e) {
+        const video = getVideo(e);
+        if (!video) return;
+        if (isNetflix()) {
+            seekPiP(10)
+        } else {
+            video.currentTime = video.currentTime + 10
+        }
     }
 
-    function S(e, t, n) {
-        if (e.document.querySelector("#pipController")) return;
-        let o = e.document.createElement("div");
-        o.id = "pipController", d(o, i.PLAYBACK_CONTROLS);
-        let r = e.document.createElement("div");
-        d(r, i.SPEED_CONTROLS), o.append(r), t.append(o);
-        let l = e.document.createElement("div");
-        l.classList.add("ytp-gradient-bottom2"), t.append(l), e.document.querySelector('button[data-action="play"]').addEventListener("click", (() => {
-            p(e)
-        })), e.document.querySelector('button[data-action="rewind"]').addEventListener("click", (() => {
-            x(e)
-        })), e.document.querySelector('button[data-action="forward"]').addEventListener("click", (() => {
-            C(e)
-        }));
-        let a = function (e) {
-            return e.document.body.querySelector('#pipController button[data-action="speed"]')
-        }(e);
+    function setupPiP(e, t, n) {
+        if (e.document.querySelector("#pipController")) {
+            return;
+        }
+
+        let pipController = e.document.createElement("div")
+        pipController.id = "pipController"
+        setHtml(pipController, M464.PLAYBACK_CONTROLS)
+
+        let speedControler = e.document.createElement("div")
+        setHtml(speedControler, M464.SPEED_CONTROLS)
+        pipController.append(speedControler)
+        t.append(pipController)
+
+        let gradientDiv = e.document.createElement("div")
+        gradientDiv.classList.add("ytp-gradient-bottom2")
+        t.append(gradientDiv)
+
+        e.document.querySelector('button[data-action="play"]').addEventListener("click", togglePlay)
+
+        e.document.querySelector('button[data-action="rewind"]').addEventListener("click", seekBackward)
+
+        e.document.querySelector('button[data-action="forward"]').addEventListener("click", seekForward)
+
+        let a = e.document.body.querySelector('#pipController button[data-action="speed"]');
+
         a.addEventListener("click", (t => {
-            ! function (e, t) {
-                let n = u(e).playbackRate,
-                    o = m(e);
-                if (o.classList.contains("show")) o.classList.remove("show");
-                else {
-                    o.classList.add("show");
-                    let i = t.target.getBoundingClientRect();
-                    o.style.left = i.left - 5 + "px", o.focus(), h(e, n)
-                }
-            }(e, t)
-        })), e.document.querySelector('button[data-action="next"]').addEventListener("click", (() => {
-            ! function () {
-                let e = document.querySelector(".ytp-next-button.ytp-button");
-                e && e.click()
-            }()
-        })), e.document.querySelector('button[data-action="mute"]').addEventListener("click", (() => {
-            ! function (e) {
-                const t = u(e);
-                t && (t.muted = !t.muted)
-            }(e)
-        })), e.document.querySelector('button[data-action="crop"]').addEventListener("click", (() => {
-            y(e)
-        })), e.document.querySelector("#pipVolume").addEventListener("input", (t => {
-            let n = parseInt(t.target.value);
-            ! function (e, t) {
-                const n = u(e);
-                n && (n.volume = t)
-            }(e, n / 100), w(t.target)
-        })), e.document.querySelector("#pipProgress").addEventListener("input", (t => {
+            let n = getVideo(e).playbackRate;
+            let o = getSettingsMenu(e);
+
+            if (o.classList.contains("show")) {
+                o.classList.remove("show");
+            } else {
+                o.classList.add("show");
+                let i = t.target.getBoundingClientRect();
+                o.style.left = i.left - 5 + "px"
+                o.focus()
+                checkMenu(e, n)
+            }
+        }))
+
+        e.document.querySelector('button[data-action="next"]').addEventListener("click", (() => {
+            let e = document.querySelector(".ytp-next-button.ytp-button");
+            if (e) {
+                e.click()
+            }
+        }))
+
+        e.document.querySelector('button[data-action="mute"]').addEventListener("click", (() => {
+            const t = getVideo(e);
+            if (t) {
+                t.muted = !t.muted
+            }
+        }))
+
+        e.document.querySelector('button[data-action="crop"]').addEventListener("click", cropPiP)
+
+        e.document.querySelector("#pipVolume").addEventListener("input", (t => {
+            let volume = parseInt(t.target.value);
+            console.log("pipVolume:", volume)
+            const video = getVideo(e);
+            if (video) {
+                video.volume = volume / 100
+            }
+            setSliderValue(t.target)
+        }))
+
+        e.document.querySelector("#pipProgress").addEventListener("input", (t => {
             let n = parseFloat(t.target.value) / 100;
-            f() ? function (e, t) {
-                const n = u(e);
-                n && function (e) {
-                    document.documentElement.setAttribute("seeking", !0);
-                    var t, n, o = Math.floor(1e3 * parseFloat(e));
-                    (t = window.netflix.appContext.state.playerApp.getAPI().videoPlayer, n = t.getAllPlayerSessionIds()[0], t.getVideoPlayerBySessionId(n)).seek(o), setTimeout((() => {
-                        document.documentElement.removeAttribute("seeking")
-                    }), 500)
-                }(Math.floor(n.duration * t + .5))
-            }(e, n) : function (e, t) {
-                const n = u(e);
-                n && (n.currentTime = Math.floor(b(n) * t + .5))
-            }(e, n)
-        })), e.document.querySelectorAll(".ytp-menuitem").forEach((t => {
+            let video = getVideo(e);
+            if (!video) return;
+            if (isNetflix()) {
+                document.documentElement.setAttribute("seeking", 1);
+                let duration = Math.floor(video.duration * n + .5)
+                duration = Math.floor(1e3 * parseFloat(duration));
+                var videoPlayer = window.netflix.appContext.state.playerApp.getAPI().videoPlayer
+                var sessionId = videoPlayer.getAllPlayerSessionIds()[0]
+                videoPlayer.getVideoPlayerBySessionId(sessionId).seek(duration)
+
+                setTimeout((() => {
+                    document.documentElement.removeAttribute("seeking")
+                }), 500)
+
+            } else {
+                video.currentTime = Math.floor(getDuration(video) * n + .5)
+            }
+        }))
+
+        e.document.querySelectorAll(".ytp-menuitem").forEach((t => {
             t.addEventListener("click", (t => {
-                ! function (e, t) {
-                    let n = t.target.textContent,
-                        o = 1;
-                    "normal" !== n.toLowerCase() && (o = parseFloat(n)), u(e).playbackRate = o, h(e, o);
-                    let i = m(e);
-                    i && i.classList.contains("show") && setTimeout((() => {
+                let n = t.target.textContent;
+                let o = 1;
+                if (n.toLowerCase() !== "normal") {
+                    o = parseFloat(n)
+                }
+
+                getVideo(e).playbackRate = o
+                checkMenu(e, o)
+                let i = getSettingsMenu(e);
+                if (i && i.classList.contains("show")) {
+                    setTimeout((() => {
                         i.classList.remove("show")
                     }), 300)
-                }(e, t)
+                }
             }))
-        }));
+        }))
+
         let s = e.document.querySelector(".ytp-settings-menu");
         s.addEventListener("blur", (e => {
             e.currentTarget.contains(e.relatedTarget) || a.parentElement.contains(e.relatedTarget) || s.classList.contains("show") && s.classList.remove("show")
-        })), n.addEventListener("click", (() => {
-            p(e)
+        }))
+
+        n.addEventListener("click", (() => {
+            togglePlay(e)
         }))
     }
 
-    function A(e) {
+    function isPlaying(e) {
         return !e.paused
     }
 
-    function L() {
-        a && (clearInterval(a), a = null)
+    function stopInterval() {
+        if (intervalTask) {
+            clearInterval(intervalTask)
+            intervalTask = null
+        }
     }
 
-    function E(e) {
+    function formatTime(e) {
         try {
             let t = new Date(1e3 * e).toISOString().substr(11, 8);
             return t = t.replace(/^00:/, "").replace(/^0/, ""), t
@@ -471,151 +551,252 @@ function n(o) {
         }
     }
 
-    function k(e, t, n) {
-        u(e) && (37 === n ? x(e) : 39 === n ? C(e) : 38 === n ? function (e) {
-            const t = u(e);
-            if (!t) return;
-            let n = t.volume + .1;
-            n > 1 && (n = 1), t.volume = n
-        }(e) : 40 === n ? function (e) {
-            const t = u(e);
-            if (!t) return;
-            let n = t.volume - .1;
-            n < 0 && (n = 0), t.volume = n
-        }(e) : 32 === n ? p(e) : 69 === n ? function (e) {
-            let t = Math.floor((e.innerWidth + 20) * r / l + .5);
+    function controlEvent(e, t, keyCode) {
+        const video = getVideo(e);
+        if (!video) return;
+
+        if (37 === keyCode) {
+            seekBackward(e)
+        } else if (39 === keyCode) {
+            seekForward(e)
+        } else if (38 === keyCode) {
+            let n = video.volume + .1;
+            if (n > 1) {
+                n = 1
+            }
+            video.volume = n
+        } else if (40 === keyCode) {
+            let volume = video.volume - .1;
+            if (volume < 0) {
+                volume = 0
+            }
+            video.volume = volume
+        } else if (32 === keyCode) {
+            togglePlay(e)
+        } else if (69 === keyCode) {
+            let t = Math.floor((e.innerWidth + 20) * videoHeight / videoWidth + .5);
             e.resizeBy(20, t - e.innerHeight)
-        }(e) : 83 === n ? function (e) {
-            let t = Math.floor((e.innerWidth - 20) * r / l + .5);
+        } else if (83 === keyCode) {
+            let t = Math.floor((e.innerWidth - 20) * videoHeight / videoWidth + .5);
             e.resizeBy(-20, t - e.innerHeight)
-        }(e) : 67 === n ? y(e) : 80 === n && t && t.altKey && documentPictureInPicture.window && documentPictureInPicture.window.close())
+        } else if (67 === keyCode) {
+            cropPiP(e)
+        } else if (80 === keyCode && video.altKey && documentPictureInPicture.window) {
+            documentPictureInPicture.window.close()
+        }
     }
 
-    function M(n) {
+    function exitPiP(n) {
         let o = n.target.querySelector("video");
-        o.onloadedmetadata = null, s && (s.append(o), s = null), e.exitPiPHandler(n), L(), t.sendFromScript("mouseleave"), window.focus()
+        o.onloadedmetadata = null
+        if (parentVideo) {
+            parentVideo.append(o)
+            parentVideo = null
+        }
+        M944.exitPiPHandler(n)
+        stopInterval()
+        M748.sendFromScript("mouseleave")
+        window.focus()
     }
     escapeHTMLPolicy = trustedTypes.createPolicy("forceInner", {
         createHTML: e => e
     })
 
-    t.listenToContent(((e, t) => {
+    M748.listenToContent(((e, t) => {
         console.log({
             msgKeyStr: e,
             _msgValue: t
         });
         let n = documentPictureInPicture.window;
-        n && k(n, null, parseInt(e))
+        if (!n) return;
+        controlEvent(n, null, parseInt(e))
     }))
 
-    {
-        c.speedupYoutubeAds = "true" === t.getDocAttribute("speedupYoutubeAds");
-        let e = t.getDocAttribute("resize");
-        if (e) {
-            let [n, o] = t.parseSizeStr(e);
-            n && o && (c.height = n, c.width = o)
+    windowConfig.speedupYoutubeAds = "true" === M748.getDocAttribute("speedupYoutubeAds");
+    let sizeStr = M748.getDocAttribute("resize");
+    if (sizeStr) {
+        let [n, o] = M748.parseSizeStr(sizeStr);
+        if (n && o) {
+            windowConfig.height = n
+            windowConfig.width = o
         }
     }
 
-    {
-        if (documentPictureInPicture.window) {
-            documentPictureInPicture.window.close();
-        } else {
-            const n = findLargestPlayingVideo();
-            console.log("findLargestPlayingVideo", n);
+    if (documentPictureInPicture.window) {
+        documentPictureInPicture.window.close();
+    } else {
 
-            if (!n) return;
-            s = n.parentElement;
-            let p = await documentPictureInPicture.requestWindow({
-                height: c.height,
-                width: c.width
-            });
-            l = n.videoWidth, r = n.videoHeight;
-            let m = p.document.createElement("div");
-            m.classList.add("video-wrapper"), p.document.body.append(m), n.classList.add("noselect"), m.append(n), S(p, m, n),
-                function (e, t) {
-                    L(), a = setInterval((() => {
-                        ! function (e, t) {
-                            document.documentElement.hasAttribute("seeking") || function (e, t) {
-                                let n = function (e) {
-                                    return e.document.body.querySelector('#pipController button[data-action="play"]')
-                                }(e);
-                                n && (t.playing ? n.classList.contains("pip-play") && (n.classList.remove("pip-play"), n.classList.add("pip-pause"), d(n, i.PAUSE_BUTTON_SVG)) : n.classList.contains("pip-pause") && (n.classList.add("pip-play"), n.classList.remove("pip-pause"), d(n, i.PLAY_BUTTON_SVG)));
-                                let o = function (e) {
-                                    return e.document.body.querySelector('#pipController button[data-action="mute"]')
-                                }(e);
-                                o && (t.muted ? o.classList.contains("pip-unmuted") && (o.classList.add("pip-muted"), o.classList.remove("pip-unmuted"), d(o, i.MUTED_BUTTON_SVG)) : o.classList.contains("pip-muted") && (o.classList.add("pip-unmuted"), o.classList.remove("pip-muted"), d(o, i.UNMUTED_BUTTON_SVG)));
-                                let r = function (e) {
-                                    return e.document.body.querySelector("#pipProgress")
-                                }(e);
-                                if (r) {
-                                    let e = t.currentTime / t.duration,
-                                        n = Math.floor(1e3 * e + .5) / 10;
-                                    r.value = n, w(r)
-                                }
-                                let l = function (e) {
-                                    return e.document.body.querySelector("#pipController .control-time-1")
-                                }(e),
-                                    a = function (e) {
-                                        return e.document.body.querySelector("#pipController .control-time-2")
-                                    }(e);
-                                if (l) {
-                                    let e = E(t.currentTime);
-                                    if (t.duration === 1 / 0) l.textContent = e, a.textContent = "";
-                                    else {
-                                        let n = E(t.duration);
-                                        l.textContent = e, a.textContent = " / " + n
-                                    }
-                                }
-                                let s = function (e) {
-                                    return e.document.body.querySelector("#pipVolume")
-                                }(e);
-                                s && (s.value = 100 * t.volume, w(s))
-                            }(e, {
-                                playbackRate: t.playbackRate,
-                                playing: A(t),
-                                muted: t.muted,
-                                volume: t.volume,
-                                currentTime: t.currentTime,
-                                duration: b(t)
-                            })
-                        }(e, t)
-                    }), 200)
-                }(p, n);
-            const g = document.createElement("style");
-            g.textContent = o.controlStyles;
-            let h = e.siteStyles();
-            h && (g.textContent += "\n" + h), p.document.head.appendChild(g), e.enterPiPHandler(p, m), p.addEventListener("pagehide", M), p.addEventListener("resize", (e => {
-                ! function (e) {
-                    let n = u(e),
-                        o = r / l,
-                        i = e.innerHeight / e.innerWidth;
-                    Math.abs(o - i) < .005 ? n.classList.add("almost-perfect") : n.classList.remove("almost-perfect");
-                    let a = function (e) {
-                        return e.document.querySelector("#pipController")
-                    }(e),
-                        s = function (e) {
-                            return e.document.querySelector(".ytp-gradient-bottom2")
-                        }(e),
-                        c = e.innerWidth;
-                    if (e.innerWidth * r > e.innerHeight * l) c = Math.floor(e.innerHeight * l / r + .5), a.style = `width: ${c}px; left: calc(50% - ${c / 2}px);`, s.style = `width: ${c}px; left: calc(50% - ${c / 2}px);`;
-                    else if (e.innerWidth * r < e.innerHeight * l) {
-                        let t = Math.floor(e.innerWidth * r / l + .5);
-                        a.style = `bottom: calc(50% - ${t / 2}px);`, s.style = `height: ${t}px; bottom: calc(50% - ${t / 2}px);`
-                    }
-                    let d = e.document.querySelector(".control-group-time .control-time-2"),
-                        p = e.document.querySelector(".control-group-time");
-                    c < 320 ? d.classList.add("hidden") : d.classList.remove("hidden"), c < 280 ? p.classList.add("hidden") : p.classList.remove("hidden"), t.sendFromScript("resize", t.getSizeStr(e.innerHeight, e.innerWidth))
-                }(p)
-            })), p.addEventListener("keydown", (e => {
-                e.preventDefault(), k(p, e, e.keyCode)
-            })), p.document.addEventListener("mouseenter", (() => {
-                t.sendFromScript("mouseenter")
-            })), p.document.addEventListener("mouseleave", (() => {
-                t.sendFromScript("mouseleave")
-            })), n.onloadedmetadata = t => {
-                e.metadataLoadedHandler(t, c)
+
+        const video = findLargestPlayingVideo();
+        console.log("findLargestPlayingVideo", video);
+
+        if (!video) {
+            return;
+        }
+
+        parentVideo = video.parentElement;
+        let windowPiP = await documentPictureInPicture.requestWindow({
+            height: windowConfig.height,
+            width: windowConfig.width
+        });
+        videoWidth = video.videoWidth
+        videoHeight = video.videoHeight
+
+        let videoWrapper = windowPiP.document.createElement("div");
+        videoWrapper.classList.add("video-wrapper")
+        windowPiP.document.body.append(videoWrapper)
+
+        video.classList.add("noselect")
+        videoWrapper.append(video)
+
+        setupPiP(windowPiP, videoWrapper, video)
+
+        stopInterval()
+        intervalTask = setInterval(() => {
+            if (document.documentElement.hasAttribute("seeking")) return;
+
+            let playBtn = windowPiP.document.body.querySelector('#pipController button[data-action="play"]')
+            let state = {
+                playbackRate: playBtn.playbackRate,
+                playing: isPlaying(playBtn),
+                muted: playBtn.muted,
+                volume: playBtn.volume,
+                currentTime: playBtn.currentTime,
+                duration: getDuration(playBtn)
             }
+
+            if (playBtn) {
+                if (state.playing) {
+                    if (playBtn.classList.contains("pip-play")) {
+                        playBtn.classList.remove("pip-play");
+                        playBtn.classList.add("pip-pause");
+                        setHtml(playBtn, M464.PAUSE_BUTTON_SVG)
+                    }
+                } else {
+                    if (playBtn.classList.contains("pip-pause")) {
+                        playBtn.classList.add("pip-play");
+                        playBtn.classList.remove("pip-pause");
+                        setHtml(playBtn, M464.PLAY_BUTTON_SVG)
+                    }
+                }
+            }
+
+            let muteBtn = windowPiP.document.body.querySelector('#pipController button[data-action="mute"]')
+            if (muteBtn) {
+                if (state.muted) {
+                    if (muteBtn.classList.contains("pip-unmuted")) {
+                        muteBtn.classList.add("pip-muted");
+                        muteBtn.classList.remove("pip-unmuted");
+                        setHtml(muteBtn, M464.MUTED_BUTTON_SVG)
+                    }
+                } else {
+                    if (muteBtn.classList.contains("pip-muted")) {
+                        muteBtn.classList.add("pip-unmuted");
+                        muteBtn.classList.remove("pip-muted");
+                        setHtml(muteBtn, M464.UNMUTED_BUTTON_SVG)
+                    }
+                }
+            }
+
+            let pipProgress = windowPiP.document.body.querySelector("#pipProgress")
+            if (pipProgress) {
+                let e = state.currentTime / state.duration
+                let n = Math.floor(1e3 * e + .5) / 10;
+                pipProgress.value = n
+                setSliderValue(pipProgress)
+            }
+
+            let controlTime1 = windowPiP.document.body.querySelector("#pipController .control-time-1")
+            let controlTime2 = windowPiP.document.body.querySelector("#pipController .control-time-2")
+            if (controlTime1) {
+                let e = formatTime(state.currentTime);
+                if (state.duration === 1 / 0) {
+                    controlTime1.textContent = e
+                    controlTime2.textContent = ""
+                } else {
+                    let n = formatTime(state.duration);
+                    controlTime1.textContent = e
+                    controlTime2.textContent = " / " + n
+                }
+            }
+
+            let pipVolume = windowPiP.document.body.querySelector("#pipVolume")
+            if (pipVolume) {
+                pipVolume.value = 100 * state.volume
+                setSliderValue(pipVolume)
+            }
+        }, 200)
+
+        const styleEle = document.createElement("style");
+        styleEle.textContent = controlStyles.controlStyles;
+
+        let siteStyle = M944.siteStyles();
+        if (siteStyle) {
+            styleEle.textContent += "\n" + siteStyle
+        }
+
+        windowPiP.document.head.appendChild(styleEle)
+        M944.enterPiPHandler(windowPiP, videoWrapper)
+        windowPiP.addEventListener("pagehide", exitPiP)
+
+        windowPiP.addEventListener("resize", function (e) {
+            let n = getVideo(this)
+            let o = videoHeight / videoWidth
+            let i = this.innerHeight / this.innerWidth
+
+            if (Math.abs(o - i) < .005) {
+                n.classList.add("almost-perfect")
+            } else {
+                n.classList.remove("almost-perfect")
+            }
+
+            let a = this.document.querySelector("#pipController")
+            let s = this.document.querySelector(".ytp-gradient-bottom2")
+
+            let c = this.innerWidth
+            if (this.innerWidth * videoHeight > this.innerHeight * videoWidth) {
+                c = Math.floor(this.innerHeight * videoWidth / videoHeight + .5)
+                a.style = `width: ${c}px; left: calc(50% - ${c / 2}px);`
+                s.style = `width: ${c}px; left: calc(50% - ${c / 2}px);`
+            } else if (this.innerWidth * videoHeight < this.innerHeight * videoWidth) {
+                let t = Math.floor(this.innerWidth * videoHeight / videoWidth + .5)
+                a.style = `bottom: calc(50% - ${t / 2}px);`
+                s.style = `height: ${t}px; bottom: calc(50% - ${t / 2}px);`
+            }
+
+            let d = this.document.querySelector(".control-group-time .control-time-2")
+            let q = this.document.querySelector(".control-group-time")
+
+            if (c < 320) {
+                d.classList.add("hidden")
+            } else {
+                d.classList.remove("hidden")
+            }
+
+            if (c < 280) {
+                q.classList.add("hidden")
+            } else {
+                q.classList.remove("hidden")
+            }
+
+            M748.sendFromScript("resize", M748.getSizeStr(this.innerHeight, this.innerWidth))
+        })
+
+        windowPiP.addEventListener("keydown", function (e) {
+            e.preventDefault()
+            controlEvent(this, e, e.keyCode)
+        })
+
+        windowPiP.document.addEventListener("mouseenter", function () {
+            M748.sendFromScript("mouseenter")
+        })
+
+        windowPiP.document.addEventListener("mouseleave", function () {
+            M748.sendFromScript("mouseleave")
+        })
+
+        video.onloadedmetadata = function (t) {
+            M944.metadataLoadedHandler(t, windowConfig)
         }
     }
 })();
